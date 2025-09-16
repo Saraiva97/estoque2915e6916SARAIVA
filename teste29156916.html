@@ -1,0 +1,1530 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Controle de Peças por Produto</title>
+  <style>
+    :root {
+      --primary-color: #2c3e50;
+      --secondary-color: #3498db;
+      --accent-color: #e74c3c;
+      --light-color: #ecf0f1;
+      --dark-color: #2c3e50;
+      --success-color: #27ae60;
+      --warning-color: #f39c12;
+      --danger-color: #e74c3c;
+      --card-bg-1: #ffffff;
+      --card-bg-2: #f8f9fa;
+      --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f9f9f9;
+      color: #333;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-container {
+      display: flex;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .logo {
+      height: 60px;
+      margin-right: 20px;
+    }
+    h1 {
+      color: var(--primary-color);
+      margin: 0;
+      border-bottom: none;
+      padding-bottom: 0;
+      flex-grow: 1;
+    }
+    .upload-section {
+      margin: 20px 0;
+      padding: 20px;
+      border: 2px dashed #ccc;
+      border-radius: 5px;
+      text-align: center;
+      background-color: var(--light-color);
+    }
+    .progress-container {
+      width: 100%;
+      background-color: #f1f1f1;
+      border-radius: 5px;
+      margin-top: 15px;
+      display: none;
+      height: 20px;
+      position: relative;
+    }
+    .progress-bar {
+      width: 0%;
+      height: 100%;
+      background-color: var(--secondary-color);
+      border-radius: 5px;
+      transition: width 0.1s;
+    }
+    .progress-text {
+      position: absolute;
+      width: 100%;
+      text-align: center;
+      line-height: 20px;
+      color: var(--primary-color);
+      font-weight: bold;
+    }
+    button {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #2980b9;
+    }
+    #exportBtn {
+      background-color: #27ae60;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+      margin-left: auto;
+    }
+    #exportBtn:hover {
+      background-color: #219653;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: left;
+    }
+    th {
+      background-color: var(--primary-color);
+      color: white;
+      position: sticky;
+      top: 0;
+    }
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+    tr:hover {
+      background-color: #e9e9e9;
+    }
+    .search-container {
+      margin-bottom: 20px;
+      position: relative;
+    }
+    #productSearch {
+      width: 100%;
+      padding: 12px 15px;
+      font-size: 16px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .summary-card {
+      background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+      box-shadow: var(--card-shadow);
+      border: 1px solid #e1e5eb;
+    }
+    .summary-card-item {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: var(--card-shadow);
+      text-align: center;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      border-top: 4px solid;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 180px;
+    }
+    .summary-card-item:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
+    }
+    .summary-card-item:nth-child(1) {
+      border-top-color: #3498db;
+    }
+    .summary-card-item:nth-child(2) {
+      border-top-color: #2ecc71;
+    }
+    .summary-card-item:nth-child(3) {
+      border-top-color: #e74c3c;
+    }
+    .summary-card-item:nth-child(4) {
+      border-top-color: #f39c12;
+    }
+    .summary-card-item:nth-child(5) {
+      border-top-color: #9b59b6;
+    }
+    .summary-card-item h3 {
+      margin: 0 0 15px 0;
+      font-size: 16px;
+      color: var(--primary-color);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .summary-card-item .value {
+      font-size: 24px;
+      font-weight: bold;
+      margin: 8px 0;
+      padding: 8px 0;
+      border-radius: 6px;
+      background-color: var(--card-bg-2);
+    }
+    .summary-card-item .sub-value {
+      font-size: 14px;
+      color: #666;
+      margin: 5px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .summary-card-item .sub-value span {
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    .positive {
+      color: var(--success-color);
+    }
+    .negative {
+      color: var(--danger-color);
+    }
+    .neutral {
+      color: var(--dark-color);
+    }
+    .details-btn {
+      background-color: var(--secondary-color);
+      color: white;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: background-color 0.3s;
+    }
+    .details-btn:hover {
+      background-color: #2980b9;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+      width: 85%;
+      max-width: 900px;
+      margin: 3% auto;
+      overflow: hidden;
+      border-top: 5px solid var(--secondary-color);
+      position: relative;
+    }
+    .modal-header {
+      background: var(--primary-color);
+      color: white;
+      padding: 20px;
+      border-bottom: none;
+      position: relative;
+    }
+    .modal-title {
+      font-weight: 600;
+      font-size: 1.5rem;
+      margin: 0;
+    }
+    .product-card {
+      background: white;
+      margin: 20px;
+      overflow: hidden;
+    }
+    .product-header {
+      background: #f8f9fa;
+      padding: 15px 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .product-title {
+      font-size: 1.2rem;
+      color: var(--primary-color);
+      margin: 0;
+      font-weight: 600;
+    }
+    .product-meta {
+      display: flex;
+      gap: 15px;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      flex-wrap: wrap;
+    }
+    .balance-container {
+      display: flex;
+      padding: 15px 20px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #eee;
+      flex-wrap: wrap;
+    }
+    .balance-item {
+      flex: 1;
+      text-align: center;
+      padding: 10px;
+      min-width: 150px;
+    }
+    .balance-value {
+      font-size: 1.3rem;
+      font-weight: bold;
+      display: block;
+    }
+    .transactions-container {
+      padding: 0 20px 20px;
+      max-height: 400px;
+      overflow-y: auto;
+    }
+    .transactions-title {
+      color: var(--primary-color);
+      font-size: 1.1rem;
+      margin: 20px 0 15px;
+      padding-bottom: 8px;
+      border-bottom: 2px solid var(--secondary-color);
+    }
+    .detail-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    .detail-table th {
+      background: var(--primary-color);
+      color: white;
+      padding: 12px 10px;
+      text-align: left;
+      position: sticky;
+      top: 0;
+    }
+    .detail-table td {
+      padding: 12px 10px;
+      border-bottom: 1px solid #eee;
+    }
+    .detail-table tr:nth-child(even) {
+      background-color: #f9f9f9;
+    }
+    .detail-table tr:hover {
+      background-color: #f1f8e9;
+    }
+    .type-badge {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: bold;
+    }
+    .type-entry {
+      background-color: #E3F2FD;
+      color: #0D47A1;
+    }
+    .type-return {
+      background-color: #FFEBEE;
+      color: #B71C1C;
+    }
+    .company-tag {
+      background: #E3F2FD;
+      color: #1565C0;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: bold;
+      display: inline-flex;
+      align-items: center;
+    }
+    .company-header {
+      background-color: #d4edda;
+      font-weight: bold;
+    }
+    .filter-container {
+      margin-bottom: 15px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      align-items: center;
+    }
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    #companySelect, #balanceFilter {
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      min-width: 200px;
+    }
+    .close {
+      color: white;
+      position: absolute;
+      right: 20px;
+      top: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .close:hover {
+      color: var(--accent-color);
+    }
+    .selected-row {
+      background-color: #d4edff !important;
+      box-shadow: 0 0 8px rgba(0, 123, 255, 0.3);
+    }
+    .data-warning {
+      background-color: #fff3cd;
+      color: #856404;
+      padding: 15px;
+      border-radius: 4px;
+      margin: 10px 20px;
+      font-size: 0.9rem;
+      border-left: 5px solid #ffeeba;
+    }
+    .value-item {
+      text-align: right;
+      font-family: monospace;
+    }
+    .copyright {
+      text-align: center;
+      margin-top: 30px;
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      padding: 10px;
+    }
+    .modal-copyright {
+      text-align: center;
+      padding: 10px;
+      color: #7f8c8d;
+      font-size: 0.8rem;
+      border-top: 1px solid #eee;
+    }
+    .matched-pair-1 {
+      background-color: #E8F5E9 !important;
+    }
+    .matched-pair-2 {
+      background-color: #E3F2FD !important;
+    }
+    .matched-pair-3 {
+      background-color: #FFF3E0 !important;
+    }
+    .matched-pair-4 {
+      background-color: #F3E5F5 !important;
+    }
+    .matched-pair-5 {
+      background-color: #E0F7FA !important;
+    }
+    .matched-pair-6 {
+      background-color: #E8EAF6 !important;
+    }
+    .summary-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding-bottom: 10px;
+      border-bottom: 2px solid #e1e5eb;
+    }
+    .summary-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-color);
+    }
+    .summary-date {
+      font-size: 14px;
+      color: #7f8c8d;
+    }
+    @media (max-width: 1024px) {
+      .summary-card {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 768px) {
+      .summary-card {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header-container">
+      <img src="img/saraiva.jpeg" alt="Logo SaraivaCompany" class="logo">
+      <h1>Controle de Peças por Produto</h1>
+    </div>
+
+    <div class="upload-section">
+      <h3>Carregar Planilha</h3>
+      <input type="file" id="fileInput" accept=".xlsx, .xls, .csv" />
+      <button id="analyzeBtn">Analisar</button>
+      <div class="progress-container" id="progressContainer">
+        <div class="progress-bar" id="progressBar"></div>
+        <div class="progress-text" id="progressText">0%</div>
+      </div>
+    </div>
+
+    <div class="filter-container" id="companyFilter" style="display: none;">
+      <div class="filter-group">
+        <label for="companySelect">Razão Social:</label>
+        <select id="companySelect">
+          <option value="TODAS">Todas as Empresas</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label for="balanceFilter">Filtrar por Saldo:</label>
+        <select id="balanceFilter">
+          <option value="TODOS">Todos os Produtos</option>
+          <option value="POSITIVO">Prod. Saldo Positivo </option>
+          <option value="NEGATIVO">Prod. Saldo Negativo </option>
+          <option value="SALDO">Prod. com Saldo</option>
+          <option value="SALDO_PARIDADE">Saldo 2 (Paridade)</option>
+        </select>
+      </div>
+      <button id="exportBtn">Exportar Planilha</button>
+    </div>
+
+    <div class="summary-card" id="summarySection" style="display: none;">
+      <div class="summary-card-item">
+        <h3>Total de Produtos</h3>
+        <div class="value" id="totalProducts">0</div>
+        <div class="sub-value">Valor Total R$</div>
+        <div class="value" id="totalValue">R$ 0,00</div>
+      </div>
+      <div class="summary-card-item">
+        <h3>Total de Entradas</h3>
+        <div class="value" id="totalEntries">0</div>
+        <div class="sub-value">Valor de Entradas R$</div>
+        <div class="value" id="totalEntriesValue">R$ 0,00</div>
+      </div>
+      <div class="summary-card-item">
+        <h3>Total de Retornos</h3>
+        <div class="value" id="totalReturns">0</div>
+        <div class="sub-value">Valor de Retornos R$</div>
+        <div class="value" id="totalReturnsValue">R$ 0,00</div>
+      </div>
+      <div class="summary-card-item">
+        <h3>Saldo Atual</h3>
+        <div class="value" id="currentBalance">0</div>
+        <div class="sub-value">Valor de Saldo R$</div>
+        <div class="value" id="currentBalanceValue">R$ 0,00</div>
+      </div>
+      <div class="summary-card-item">
+        <h3>Total por Itens</h3>
+        <div class="value" id="totalItems">0</div>
+        <div class="sub-value">Entradas de itens (uni): <span id="itemsEntries">0</span></div>
+        <div class="sub-value">Retornos de itens (uni) : <span id="itemsReturns">0</span></div>
+        <div class="sub-value">Saldo por item (uni): <span id="itemsBalance">0</span></div>
+      </div>
+    </div>
+
+    <div class="search-container">
+      <input type="text" id="productSearch" placeholder="Pesquisar por código, descrição ou NCM..." />
+    </div>
+
+    <table id="productsTable">
+      <thead>
+        <tr>
+          <th>Razão Social</th>
+          <th>Código</th>
+          <th>Descrição</th>
+          <th>NCM</th>
+          <th>Unidade</th>
+          <th>Entradas (2915)</th>
+          <th>Retornos (6916)</th>
+          <th>Saldo</th>
+          <th>valor Saldo</th>
+          <th>Detalhes</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="copyright">
+      © SaraivaCompany 2025 - Todos os direitos reservados
+    </div>
+  </div>
+
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <div id="modalContent"></div>
+      <div class="modal-copyright">
+        © SaraivaCompany 2025
+      </div>
+    </div>
+  </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+    let allProductsData = [];
+    let companies = new Set();
+    let productsByCompany = {};
+    let currentlySelectedRow = null;
+    let allProducts = [];
+
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("analyzeBtn").addEventListener("click", analyzeFile);
+      document.getElementById("productSearch").addEventListener("input", updateSummaryAndFilter);
+      document.getElementById("companySelect").addEventListener("change", updateSummaryAndFilter);
+      document.getElementById("balanceFilter").addEventListener("change", updateSummaryAndFilter);
+      document.getElementById("exportBtn").addEventListener("click", exportToExcel);
+      window.addEventListener("click", windowClickHandler);
+    });
+
+    function updateProgress(percent) {
+      const progressBar = document.getElementById("progressBar");
+      const progressText = document.getElementById("progressText");
+      const progressContainer = document.getElementById("progressContainer");
+      
+      progressBar.style.width = percent + '%';
+      progressText.textContent = percent + '%';
+      progressContainer.style.display = 'block';
+    }
+
+    function formatNumber(value) {
+      return new Intl.NumberFormat('pt-BR', {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      }).format(value);
+    }
+
+    function analyzeFile() {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+
+      if (!file) {
+        alert("Por favor, selecione um arquivo primeiro.");
+        return;
+      }
+
+      updateProgress(0);
+      
+      const reader = new FileReader();
+      
+      reader.onloadstart = function() {
+        updateProgress(5);
+      };
+      
+      reader.onprogress = function(event) {
+        if (event.lengthComputable) {
+          const percentLoaded = Math.round((event.loaded / event.total) * 45) + 5;
+          updateProgress(percentLoaded);
+        }
+      };
+
+      reader.onload = function (e) {
+        updateProgress(55);
+        
+        setTimeout(() => {
+          try {
+            updateProgress(60);
+            const data = new Uint8Array(e.target.result);
+            updateProgress(70);
+            const workbook = XLSX.read(data, { type: "array" });
+            updateProgress(80);
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+            updateProgress(90);
+            
+           function normalizeKey(key) {
+  return key
+    ?.toString()
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, ' ')   // normaliza espaços múltiplos
+    .replace(/[;,.]/g, '')  // remove pontuação ; , .
+    ;
+}
+
+const mappedData = jsonData.map(row => {
+  // cria um objeto com chaves normalizadas
+  const normalizedRow = {};
+  for (const key in row) {
+    normalizedRow[normalizeKey(key)] = row[key];
+  }
+
+  return {
+    'Data': normalizedRow['data'],
+    'Espécie': normalizedRow['espécie'],
+    'Série': normalizedRow['série'],
+    'Número': normalizedRow['número'],
+    'CNPJ / Série SAT': normalizedRow['cnpj / série sat'],
+    'Razão Social': normalizedRow['razão social'],
+    'CFOP': normalizedRow['cfop'],
+    'Produto': normalizedRow['produto'],
+    'Descrição': normalizedRow['descrição']?.toString().trim(),
+    'NCM': normalizedRow['ncm']?.toString().trim(),
+    'Quantidade': Number(normalizedRow['quantidade']) || 0,
+    'Unidade': normalizedRow['unidade']?.toString().trim(),
+    'Isento ICMS': parseFloat(normalizedRow['isento icms']) || 0,
+    'Outras ICMS': parseFloat(normalizedRow['outras icms']) || 0,
+    'Valor Usado': (parseFloat(normalizedRow['isento icms']) && parseFloat(normalizedRow['isento icms']) !== 0)
+                   ? parseFloat(normalizedRow['isento icms'])
+                   : (parseFloat(normalizedRow['outras icms']) || 0)
+  };
+});
+
+            
+            updateProgress(95);
+            processData(mappedData);
+            updateProgress(100);
+            
+            setTimeout(() => {
+              document.getElementById("progressContainer").style.display = 'none';
+            }, 500);
+            
+            } catch (error) {
+            console.error("Erro ao processar arquivo:", error);
+            alert("Erro ao processar o arquivo. Verifique o formato e tente novamente.");
+            document.getElementById("progressContainer").style.display = 'none';
+          }
+        }, 300);
+      };
+      
+      reader.onerror = function () {
+        alert("Erro ao ler o arquivo. Por favor, tente novamente.");
+        document.getElementById("progressContainer").style.display = 'none';
+      };
+      
+      reader.readAsArrayBuffer(file);
+    }
+
+    function processData(data) {
+      const productsMap = new Map();
+      allProductsData = data;
+      companies = new Set();
+      productsByCompany = {};
+
+      data.forEach((row) => {
+        const company = row['Razão Social'];
+        companies.add(company);
+        
+        const key = `${row['Produto']}|${company}`;
+        const cfop = String(row['CFOP']).trim();
+        const quantity = row['Quantidade'];
+        const valorTotal = row['Valor Usado'];
+        const valorItem = quantity !== 0 ? (valorTotal / quantity) : 0;
+
+        if (!productsMap.has(key)) {
+          productsMap.set(key, {
+            code: row['Produto'],
+            description: row['Descrição'],
+            ncm: row['NCM'],
+            unit: row['Unidade'],
+            company: company,
+            entries: 0,
+            returns: 0,
+            transactions: []
+          });
+        }
+
+        const product = productsMap.get(key);
+        const transaction = {
+          type: cfop === '2915' ? 'Entrada' : 'Retorno',
+          cfop: cfop,
+          date: row['Data'],
+          document: row['Número'],
+          cnpj: row['CNPJ / Série SAT'],
+          company: company,
+          quantity: quantity,
+          valorTotal: valorTotal,
+          valorItem: valorItem
+        };
+
+        product.transactions.push(transaction);
+
+        if (cfop === '2915') {
+          product.entries += quantity;
+        } else if (cfop === '6916') {
+          product.returns += quantity;
+        }
+      });
+
+      allProducts = Array.from(productsMap.values());
+      allProducts.forEach(product => {
+        if (!productsByCompany[product.company]) {
+          productsByCompany[product.company] = [];
+        }
+        productsByCompany[product.company].push(product);
+      });
+
+      updateCompanyFilter();
+      displayProductsGroupedByCompany();
+      updateSummary();
+    }
+
+    function updateCompanyFilter() {
+      const companySelect = document.getElementById("companySelect");
+      while (companySelect.options.length > 1) {
+        companySelect.remove(1);
+      }
+      
+      const sortedCompanies = Array.from(companies).sort();
+      sortedCompanies.forEach(company => {
+        const option = document.createElement("option");
+        option.value = company;
+        option.textContent = company;
+        companySelect.appendChild(option);
+      });
+      
+      document.getElementById("companyFilter").style.display = "flex";
+      document.getElementById("summarySection").style.display = "grid";
+    }
+
+    function updateSummaryAndFilter() {
+      updateSummary();
+      filterProducts();
+    }
+
+    function filterProducts() {
+      const searchTerm = document.getElementById("productSearch").value.toLowerCase();
+      const selectedCompany = document.getElementById("companySelect").value;
+      const selectedBalance = document.getElementById("balanceFilter").value;
+      const rows = document.querySelectorAll("#productsTable tbody tr");
+
+      rows.forEach((row) => {
+        if (row.classList.contains('company-header')) {
+          const companyName = row.textContent.replace('Empresa: ', '').trim();
+          const shouldShow = selectedCompany === "TODAS" || companyName === selectedCompany;
+          let hasVisibleProducts = false;
+          let nextRow = row.nextElementSibling;
+          
+          while (nextRow && !nextRow.classList.contains('company-header')) {
+            if (nextRow.style.display !== 'none') {
+              hasVisibleProducts = true;
+              break;
+            }
+            nextRow = nextRow.nextElementSibling;
+          }
+          
+          row.style.display = (shouldShow && hasVisibleProducts) ? "" : "none";
+        } else {
+          const company = row.cells[0].textContent;
+          const productCode = row.cells[1].textContent.toLowerCase();
+          const description = row.cells[2].textContent.toLowerCase();
+          const ncm = row.cells[3].textContent.toLowerCase();
+          const balance = parseInt(row.cells[7].textContent);
+
+          const companyMatch = selectedCompany === "TODAS" || company === selectedCompany;
+          const balanceMatch = selectedBalance === "TODOS" || 
+                            (selectedBalance === "POSITIVO" && balance > 0) ||
+                            (selectedBalance === "NEGATIVO" && balance < 0) ||
+                            (selectedBalance === "SALDO" && balance !== 0) ||
+                            (selectedBalance === "SALDO_PARIDADE" && balance !== 0);
+          const searchMatch = 
+            company.toLowerCase().includes(searchTerm) || 
+            productCode.includes(searchTerm) || 
+            description.includes(searchTerm) || 
+            ncm.includes(searchTerm);
+
+          row.style.display = (companyMatch && balanceMatch && searchMatch) ? "" : "none";
+        }
+      });
+    }
+
+    function updateSummary() {
+      const selectedCompany = document.getElementById("companySelect").value;
+      const selectedBalance = document.getElementById("balanceFilter").value;
+      const searchTerm = document.getElementById("productSearch").value.toLowerCase();
+      
+      let filteredProducts = selectedCompany === "TODAS" 
+        ? allProducts 
+        : allProducts.filter(p => p.company === selectedCompany);
+
+      if (selectedBalance === "POSITIVO") {
+        filteredProducts = filteredProducts.filter(p => (p.entries - p.returns) > 0);
+      } else if (selectedBalance === "NEGATIVO") {
+        filteredProducts = filteredProducts.filter(p => (p.entries - p.returns) < 0);
+      } else if (selectedBalance === "SALDO" || selectedBalance === "SALDO_PARIDADE") {
+        filteredProducts = filteredProducts.filter(p => (p.entries - p.returns) !== 0);
+      }
+
+      if (searchTerm) {
+        filteredProducts = filteredProducts.filter(p => 
+          p.company.toLowerCase().includes(searchTerm) ||
+          p.code.toLowerCase().includes(searchTerm) ||
+          (p.description && p.description.toLowerCase().includes(searchTerm)) ||
+          (p.ncm && p.ncm.toLowerCase().includes(searchTerm))
+        );
+      }
+
+      const totalProducts = filteredProducts.length;
+      const totalEntries = filteredProducts.reduce((sum, p) => sum + p.entries, 0);
+      const totalReturns = filteredProducts.reduce((sum, p) => sum + p.returns, 0);
+      const totalBalance = totalEntries - totalReturns;
+
+      const totalEntriesValue = filteredProducts.reduce((sum, p) => {
+        return sum + p.transactions
+          .filter(t => t.type === 'Entrada')
+          .reduce((sumT, t) => sumT + parseFloat(t.valorTotal), 0);
+      }, 0);
+
+      const totalReturnsValue = filteredProducts.reduce((sum, p) => {
+        return sum + p.transactions
+          .filter(t => t.type === 'Retorno')
+          .reduce((sumT, t) => sumT + parseFloat(t.valorTotal), 0);
+      }, 0);
+
+      const totalBalanceValue = totalEntriesValue - totalReturnsValue;
+      const totalValue = totalEntriesValue + totalReturnsValue;
+
+      // --- Totais por Itens (cada produto conta 1 vez se tiver entrada ou saída) ---
+      let itemsEntries = 0;
+      let itemsReturns = 0;
+
+      filteredProducts.forEach(p => {
+        const hasEntrada = p.transactions.some(t => t.type === 'Entrada');
+        const hasRetorno = p.transactions.some(t => t.type === 'Retorno');
+
+        if (hasEntrada) itemsEntries += 1;
+        if (hasRetorno) itemsReturns += 1;
+      });
+
+      const itemsBalance = itemsEntries - itemsReturns;
+
+      document.getElementById("totalProducts").textContent = totalProducts;
+      document.getElementById("totalEntries").textContent = formatNumber(totalEntries);
+      document.getElementById("totalReturns").textContent = formatNumber(totalReturns);
+      document.getElementById("currentBalance").textContent = formatNumber(totalBalance);
+
+      document.getElementById("totalEntriesValue").textContent = `R$ ${formatNumber(totalEntriesValue)}`;
+      document.getElementById("totalReturnsValue").textContent = `R$ ${formatNumber(totalReturnsValue)}`;
+      document.getElementById("currentBalanceValue").textContent = `R$ ${formatNumber(totalBalanceValue)}`;
+      document.getElementById("totalValue").textContent = `R$ ${formatNumber(totalValue)}`;
+
+      // Atualiza no resumo
+      document.getElementById("totalItems").textContent = filteredProducts.length;
+      document.getElementById("itemsEntries").textContent = itemsEntries;
+      document.getElementById("itemsReturns").textContent = itemsReturns;
+      document.getElementById("itemsBalance").textContent = itemsBalance;
+
+      const balanceEl = document.getElementById("currentBalance");
+      balanceEl.className = totalBalance > 0 ? "value positive" : totalBalance < 0 ? "value negative" : "value neutral";
+      
+      const balanceValueEl = document.getElementById("currentBalanceValue");
+      balanceValueEl.className = totalBalanceValue > 0 ? "value positive" : totalBalanceValue < 0 ? "value negative" : "value neutral";
+    }
+
+    function highlightSelectedRow(row) {
+      if (currentlySelectedRow) {
+        currentlySelectedRow.classList.remove('selected-row');
+      }
+      row.classList.add('selected-row');
+      currentlySelectedRow = row;
+    }
+
+
+function displayProductsGroupedByCompany() {
+  const tableBody = document.querySelector("#productsTable tbody");
+  tableBody.innerHTML = "";
+
+  const sortedCompanies = Object.keys(productsByCompany).sort();
+
+  sortedCompanies.forEach(company => {
+    const headerRow = document.createElement("tr");
+    headerRow.className = "company-header";
+    headerRow.innerHTML = `<td colspan="10"><strong>Empresa:</strong> ${company}</td>`;
+    tableBody.appendChild(headerRow);
+
+    productsByCompany[company].forEach((product) => {
+      const balance = product.entries - product.returns;
+      const balanceClass = balance > 0 ? "positive" : balance < 0 ? "negative" : "neutral";
+
+      // Calcular valor de saldo: entradas - retornos
+      const totalEntriesValue = product.transactions
+        .filter(t => t.type === 'Entrada')
+        .reduce((sum, t) => sum + parseFloat(t.valorTotal), 0);
+
+      const totalReturnsValue = product.transactions
+        .filter(t => t.type === 'Retorno')
+        .reduce((sum, t) => sum + parseFloat(t.valorTotal), 0);
+
+      const saldoValor = totalEntriesValue - totalReturnsValue;
+
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${product.company || '-'}</td>
+        <td>${product.code}</td>
+        <td>${product.description}</td>
+        <td>${product.ncm}</td>
+        <td>${product.unit}</td>
+        <td>${product.entries}</td>
+        <td>${product.returns}</td>
+        <td class="${balanceClass}">${balance}</td>
+        <td class="value-item ${balanceClass}">R$ ${formatNumber(saldoValor)}</td>
+        <td><button class="details-btn" onclick="showProductDetails('${product.code}', '${product.company}', event)">Detalhes</button></td>
+      `;
+      tableBody.appendChild(row);
+    });
+  });
+}
+
+
+    function showProductDetails(productCode, company, event) {
+      const clickedRow = event.target.closest('tr');
+      highlightSelectedRow(clickedRow);
+
+      const productTransactions = allProductsData.filter(item => 
+        item['Produto'] === productCode && item['Razão Social'] === company
+      );
+
+      if (productTransactions.length === 0) {
+        alert("Nenhum dado encontrado para este produto e empresa.");
+        return;
+      }
+
+      const uniqueDescriptions = [...new Set(productTransactions.map(item => item['Descrição']))];
+      const uniqueNcms = [...new Set(productTransactions.map(item => item['NCM']))];
+      const uniqueUnits = [...new Set(productTransactions.map(item => item['Unidade']))];
+      const uniqueValores = [...new Set(productTransactions.map(item => item['Valor Usado']))];
+      
+      const hasVariations = uniqueDescriptions.length > 1 || uniqueNcms.length > 1 || uniqueUnits.length > 1 || uniqueValores.length > 1;
+
+      let warningMessage = '';
+      if (hasVariations) {
+        warningMessage = `<div class="data-warning"><strong>Atenção:</strong> Este produto possui variações nos dados:`;
+        
+        if (uniqueDescriptions.length > 1) {
+          warningMessage += `<br>• ${uniqueDescriptions.length} descrições diferentes:<br>`;
+          uniqueDescriptions.forEach((desc, index) => {
+            warningMessage += `&nbsp;&nbsp;&nbsp;${index+1}. ${desc}<br>`;
+          });
+        }
+        if (uniqueNcms.length > 1) {
+          warningMessage += `<br>• ${uniqueNcms.length} NCMs diferentes`;
+        }
+        if (uniqueUnits.length > 1) {
+          warningMessage += `<br>• ${uniqueUnits.length} unidades diferentes`;
+        }
+        if (uniqueValores.length > 1) {
+          warningMessage += `<br>• ${uniqueValores.length} valores totais diferentes: `;
+          warningMessage += uniqueValores.map(v => formatNumber(v)).join(', ');
+        }
+        
+        warningMessage += `</div>`;
+      }
+
+      const productGroup = {
+        code: productCode,
+        description: productTransactions[0]['Descrição'],
+        ncm: productTransactions[0]['NCM'],
+        unit: productTransactions[0]['Unidade'],
+        entries: 0,
+        returns: 0,
+        transactions: []
+      };
+
+      productTransactions.forEach(item => {
+        const quantity = item['Quantidade'];
+        const cfop = String(item['CFOP']).trim();
+        const valorTotal = item['Valor Usado'];
+        const valorItem = quantity !== 0 ? (valorTotal / quantity) : 0;
+        
+        if (cfop === '2915') productGroup.entries += quantity;
+        else if (cfop === '6916') productGroup.returns += quantity;
+
+        productGroup.transactions.push({
+          type: cfop === '2915' ? 'Entrada' : 'Retorno',
+          date: item['Data'],
+          document: item['Número'],
+          quantity: quantity,
+          cfop: cfop,
+          valorItem: valorItem,
+          valorTotal: valorTotal,
+          matchedWith: null, // Inicializa como não pareado
+          pairId: null
+        });
+      });
+
+      // Checar correspondência entre Entradas e Retornos
+      const entradas = productGroup.transactions.filter(t => t.type === 'Entrada');
+      const retornos = productGroup.transactions.filter(t => t.type === 'Retorno');
+
+      // Para cada retorno, tentar encontrar uma entrada correspondente
+      let pairCounter = 1;
+      retornos.forEach(retorno => {
+        const entradaIndex = entradas.findIndex(entrada => 
+          entrada.valorItem === retorno.valorItem && 
+          entrada.quantity === retorno.quantity && 
+          entrada.matchedWith === null // Ainda não foi pareada
+        );
+
+        if (entradaIndex !== -1) {
+          const entrada = entradas[entradaIndex];
+          const entradaGlobalIndex = productGroup.transactions.indexOf(entrada);
+          const retornoGlobalIndex = productGroup.transactions.indexOf(retorno);
+
+          // Marcar como pareados
+          productGroup.transactions[entradaGlobalIndex].matchedWith = retornoGlobalIndex;
+          productGroup.transactions[retornoGlobalIndex].matchedWith = entradaGlobalIndex;
+          productGroup.transactions[entradaGlobalIndex].pairId = pairCounter;
+          productGroup.transactions[retornoGlobalIndex].pairId = pairCounter;
+          pairCounter++;
+        }
+      });
+
+      const balance = productGroup.entries - productGroup.returns;
+      const balanceClass = balance > 0 ? "positive" : balance < 0 ? "negative" : "neutral";
+
+      const totalEntriesValue = productGroup.transactions
+        .filter(t => t.type === 'Entrada')
+        .reduce((sum, t) => sum + parseFloat(t.valorTotal), 0);
+
+      const totalReturnsValue = productGroup.transactions
+        .filter(t => t.type === 'Retorno')
+        .reduce((sum, t) => sum + parseFloat(t.valorTotal), 0);
+
+      const totalBalanceValue = totalEntriesValue - totalReturnsValue;
+
+      const modalContent = document.getElementById("modalContent");
+      modalContent.innerHTML = `
+        <div class="modal-header">
+          <h2 class="modal-title">Detalhes do Produto</h2>
+        </div>
+        <div class="product-card">
+          <div class="product-header">
+            <h3 class="product-title">${productGroup.code} - ${productGroup.description}</h3>
+            <div class="product-meta">
+              <span>NCM: ${productGroup.ncm}</span>
+              <span>Unidade: ${productGroup.unit}</span>
+              <span class="company-tag">${company}</span>
+            </div>
+          </div>
+          ${warningMessage}
+          <div class="balance-container">
+            <div class="balance-item">
+              <span>Entradas (2915)</span>
+              <span class="balance-value">${productGroup.entries}</span>
+              <span>R$ ${formatNumber(totalEntriesValue)}</span>
+            </div>
+            <div class="balance-item">
+              <span>Retornos (6916)</span>
+              <span class="balance-value">${productGroup.returns}</span>
+              <span>R$ ${formatNumber(totalReturnsValue)}</span>
+            </div>
+            <div class="balance-item">
+              <span>Saldo</span>
+              <span class="balance-value ${balanceClass}">${balance}</span>
+              <span class="${balanceClass}">R$ ${formatNumber(totalBalanceValue)}</span>
+            </div>
+          </div>
+          <div class="transactions-container">
+            <h4 class="transactions-title">Transações</h4>
+            <table class="detail-table">
+              <thead>
+                <tr>
+                  <th>Tipo</th>
+                  <th>Data</th>
+                  <th>Documento</th>
+                  <th>CFOP</th>
+                  <th>Quantidade</th>
+                  <th>Valor Unitário</th>
+                  <th>Valor Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${productGroup.transactions.map((transaction, index) => {
+                  const pairClass = transaction.pairId ? `matched-pair-${(transaction.pairId % 6) + 1}` : '';
+                  return `
+                    <tr class="${pairClass}">
+                      <td><span class="type-badge ${transaction.type === 'Entrada' ? 'type-entry' : 'type-return'}">${transaction.type}</span></td>
+                      <td>${transaction.date}</td>
+                      <td>${transaction.document}</td>
+                      <td>${transaction.cfop}</td>
+                      <td>${transaction.quantity}</td>
+                      <td class="value-item">R$ ${formatNumber(transaction.valorItem)}</td>
+                      <td class="value-item">R$ ${formatNumber(transaction.valorTotal)}</td>
+                    </tr>
+                  `;
+                }).join('')}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+
+      document.getElementById("productModal").style.display = "block";
+    }
+
+    function closeModal() {
+      document.getElementById("productModal").style.display = "none";
+    }
+
+    function windowClickHandler(event) {
+      const modal = document.getElementById("productModal");
+      if (event.target === modal) {
+        closeModal();
+      }
+    }
+
+    // Função para processar saldo positivo
+    function processarSaldoPositivo(product) {
+      const resultado = [];
+      let saldoRestante = product.entries - product.returns;
+
+      if (saldoRestante <= 0) return resultado;
+
+      // Ordenar entradas por data (mais antigas primeiro)
+      const entradas = product.transactions
+        .filter(t => t.type === 'Entrada')
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map(t => ({ ...t, restante: t.quantity }));
+
+      // Adicionar entradas até preencher o saldo disponível
+      for (const entrada of entradas) {
+        if (saldoRestante <= 0) break;
+
+        const qtdUsar = Math.min(saldoRestante, entrada.restante);
+
+        resultado.push({
+          data: entrada.date,
+          documento: entrada.document,
+          cfop: entrada.cfop,
+          quantidade: qtdUsar,
+          valorUnitario: entrada.valorItem,
+          valorTotal: entrada.valorItem * qtdUsar
+        });
+
+        saldoRestante -= qtdUsar;
+      }
+
+      return resultado;
+    }
+
+    // NOVA FUNÇÃO: Processar saldo negativo (retornos)
+    function processarSaldoNegativo(product) {
+      const resultado = [];
+      const saldoNegativo = Math.abs(product.entries - product.returns); // Valor absoluto do saldo negativo
+
+      if (product.entries - product.returns >= 0) return resultado; // Se não tem saldo negativo, retorna vazio
+
+      // Ordenar retornos por data (mais antigos primeiro)
+      const retornos = product.transactions
+        .filter(t => t.type === 'Retorno')
+        .sort((a, b) => new Date(a.date) - new Date(b.date))
+        .map(t => ({ ...t, restante: t.quantity }));
+
+      let saldoRestante = saldoNegativo;
+      
+      // Adicionar retornos até preencher o saldo negativo disponível
+      for (const retorno of retornos) {
+        if (saldoRestante <= 0) break;
+
+        const qtdUsar = Math.min(saldoRestante, retorno.restante);
+
+        resultado.push({
+          data: retorno.date,
+          documento: retorno.document,
+          cfop: retorno.cfop,
+          quantidade: qtdUsar,
+          valorUnitario: retorno.valorItem,
+          valorTotal: retorno.valorItem * qtdUsar
+        });
+
+        saldoRestante -= qtdUsar;
+      }
+
+      return resultado;
+    }
+
+    function exportToExcel() {
+      if (allProducts.length === 0) {
+        alert("Não há dados para exportar. Por favor, carregue e analise um arquivo primeiro.");
+        return;
+      }
+
+      const selectedCompany = document.getElementById("companySelect").value;
+      const selectedBalance = document.getElementById("balanceFilter").value;
+      
+      // Extrair apenas o primeiro nome da razão social em minúsculo e sem espaços
+      let companyName = "todasempresas";
+      if (selectedCompany !== "TODAS") {
+        // Pega o primeiro nome (antes do primeiro espaço)
+        const firstName = selectedCompany.split(' ')[0];
+        // Converte para minúsculo e remove espaços
+        companyName = firstName.toLowerCase().replace(/\s+/g, '');
+      }
+      
+      const fileName = `${companyName}.xlsx`;
+
+      // Agrupar dados para exportação
+      const exportData = [];
+      
+      // Para cada produto, adicionar transações filtradas
+      allProducts.forEach(product => {
+        // Filtro por empresa
+        if (selectedCompany !== "TODAS" && product.company !== selectedCompany) {
+          return;
+        }
+        
+        // Filtro por saldo
+        const productBalance = product.entries - product.returns;
+        if (selectedBalance === "POSITIVO" && productBalance <= 0) {
+          return;
+        }
+        if (selectedBalance === "NEGATIVO" && productBalance >= 0) {
+          return;
+        }
+        if (selectedBalance === "SALDO" && productBalance === 0) {
+          return;
+        }
+
+        // Calcular totais de entrada e saída para o produto
+        const totalEntradas = product.transactions
+          .filter(t => t.type === 'Entrada')
+          .reduce((sum, t) => sum + parseFloat(t.valorTotal), 0);
+          
+        const totalRetornos = product.transactions
+          .filter(t => t.type === 'Retorno')
+          .reduce((sum, t) => sum + parseFloat(t.valorTotal), 0);
+          
+        const saldoValor = totalEntradas - totalRetornos;
+        const quantidadeSaldo = product.entries - product.returns;
+        const valorUnitario = quantidadeSaldo !== 0 ? saldoValor / quantidadeSaldo : 0;
+
+        // CASO ESPECIAL PARA SALDO NEGATIVO - exportar apenas os retornos que compõem o saldo negativo
+        if (selectedBalance === "NEGATIVO") {
+          const saldoNegativo = processarSaldoNegativo(product);
+          saldoNegativo.forEach(transacao => {
+            exportData.push({
+              'Data': transacao.data,
+              'Espécie': 'NFE',
+              'Série': '',
+              'Número': transacao.documento,
+              'CNPJ / Série SAT': product.company,
+              'Razão Social': product.company,
+              'CFOP': transacao.cfop,
+              'Produto': product.code,
+              'Descrição': product.description,
+              'NCM': product.ncm,
+              'Quantidade': transacao.quantidade,
+              'Unidade': product.unit,
+              'Valor Unitário': transacao.valorUnitario,
+              'Valor Total': transacao.valorTotal
+            });
+          });
+          return; // já tratamos este produto
+        }
+
+        // CASO ESPECIAL PARA SALDO POSITIVO - exportar apenas as entradas que compõem o saldo
+        if (selectedBalance === "POSITIVO") {
+          const saldoPositivo = processarSaldoPositivo(product);
+          saldoPositivo.forEach(transacao => {
+            exportData.push({
+              'Data': transacao.data,
+              'Espécie': 'NFE',
+              'Série': '',
+              'Número': transacao.documento,
+              'CNPJ / Série SAT': product.company,
+              'Razão Social': product.company,
+              'CFOP': transacao.cfop,
+              'Produto': product.code,
+              'Descrição': product.description,
+              'NCM': product.ncm,
+              'Quantidade': transacao.quantidade,
+              'Unidade': product.unit,
+              'Valor Unitário': transacao.valorUnitario,
+              'Valor Total': transacao.valorTotal
+            });
+          });
+          return;
+        }
+
+        // Caso especial para saldo com paridade
+        if (selectedBalance === "SALDO_PARIDADE") {
+          // Processar com algoritmo de paridade
+          const resultadoParidade = processarParidade(product);
+          
+          // Adicionar todas as transações resultantes
+          resultadoParidade.forEach(transacao => {
+            exportData.push({
+              'Data': transacao.data,
+              'Espécie': 'NFE',
+              'Série': '',
+              'Número': transacao.documento,
+              'CNPJ / Série SAT': product.company,
+              'Razão Social': product.company,
+              'CFOP': transacao.cfop,
+              'Produto': product.code,
+              'Descrição': product.description,
+              'NCM': product.ncm,
+              'Quantidade': transacao.quantidade,
+              'Unidade': product.unit,
+              'Valor Unitário': transacao.valorUnitario,
+              'Valor Total': transacao.valorTotal
+            });
+          });
+          return;
+        }
+
+        // Para o filtro "SALDO", exportar apenas uma linha com o saldo
+        if (selectedBalance === "SALDO") {
+          exportData.push({
+            'Data': '',
+            'Espécie': '',
+            'Série': '',
+            'Número': '',
+            'CNPJ / Série SAT': product.company,
+            'Razão Social': product.company,
+            'CFOP': '',
+            'Produto': product.code,
+            'Descrição': product.description,
+            'NCM': product.ncm,
+            'Quantidade': quantidadeSaldo,
+            'Unidade': product.unit,
+            'Valor Unitário': valorUnitario,
+            'Valor Total': saldoValor
+          });
+          return;
+        }
+
+        // Para os outros filtros, exportar transações individuais
+        product.transactions.forEach(transaction => {
+          exportData.push({
+            'Data': transaction.date,
+            'Espécie': 'NFE',
+            'Série': '',
+            'Número': transaction.document,
+            'CNPJ / Série SAT': product.company,
+            'Razão Social': product.company,
+            'CFOP': transaction.cfop,
+            'Produto': product.code,
+            'Descrição': product.description,
+            'NCM': product.ncm,
+            'Quantidade': transaction.quantity,
+            'Unidade': product.unit,
+            'Valor Unitário': transaction.valorItem,
+            'Valor Total': transaction.valorTotal
+          });
+        });
+      });
+
+      // Criar a planilha
+      const ws = XLSX.utils.json_to_sheet(exportData);
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "saraiva");
+
+      // Salvar o arquivo
+      XLSX.writeFile(wb, fileName);
+    }
+
+    // NOVA FUNÇÃO: Processar paridade entre entradas e retornos
+    function processarParidade(product) {
+      const resultado = [];
+      
+      // Separar entradas e retornos
+      const entradas = product.transactions
+        .filter(t => t.type === 'Entrada')
+        .map(t => ({
+          ...t,
+          quantidadeRestante: t.quantity,
+          utilizado: 0
+        }));
+        
+      const retornos = product.transactions
+        .filter(t => t.type === 'Retorno')
+        .map(t => ({
+          ...t,
+          quantidadeRestante: t.quantity,
+          utilizado: 0
+        }));
+      
+      // Para cada retorno, tentar encontrar entradas correspondentes
+      retornos.forEach(retorno => {
+        let quantidadeParaRetornar = retorno.quantidadeRestante;
+        
+        // Ordenar entradas por valor unitário mais próximo do retorno
+        const entradasOrdenadas = [...entradas].sort((a, b) => {
+          const diffA = Math.abs(a.valorItem - retorno.valorItem);
+          const diffB = Math.abs(b.valorItem - retorno.valorItem);
+          return diffA - diffB;
+        });
+        
+        // Distribuir o retorno entre as entradas disponíveis
+        for (const entrada of entradasOrdenadas) {
+          if (quantidadeParaRetornar <= 0) break;
+          if (entrada.quantidadeRestante <= 0) continue;
+          
+          const quantidadeUsar = Math.min(quantidadeParaRetornar, entrada.quantidadeRestante);
+          const diferencaValor = retorno.valorItem - entrada.valorItem;
+          
+          // Adicionar linha de retorno ajustada
+          resultado.push({
+            data: retorno.date,
+            documento: retorno.document,
+            cfop: '6916',
+            quantidade: quantidadeUsar,
+            valorUnitario: retorno.valorItem - (diferencaValor * (quantidadeUsar / retorno.quantity)),
+            valorTotal: (retorno.valorItem - (diferencaValor * (quantidadeUsar / retorno.quantity))) * quantidadeUsar,
+            origem: entrada.document
+          });
+          
+          // Atualizar quantidades restantes
+          quantidadeParaRetornar -= quantidadeUsar;
+          entrada.quantidadeRestante -= quantidadeUsar;
+          retorno.utilizado += quantidadeUsar;
+        }
+      });
+      
+      // Adicionar entradas não utilizadas
+      entradas.forEach(entrada => {
+        if (entrada.quantidadeRestante > 0) {
+          resultado.push({
+            data: entrada.date,
+            documento: entrada.document,
+            cfop: '2915',
+            quantidade: entrada.quantidadeRestante,
+            valorUnitario: entrada.valorItem,
+            valorTotal: entrada.valorItem * entrada.quantidadeRestante,
+            origem: ''
+          });
+        }
+      });
+      
+      return resultado;
+    }
+  </script>
+</body>
+</html>
